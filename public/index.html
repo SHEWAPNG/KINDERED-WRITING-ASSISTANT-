@@ -275,14 +275,15 @@ const API_URL = window.location.hostname === 'localhost'
             const userQuery = `Write: ${inputs.what}\nTo: ${inputs.who}\nContext: ${inputs.intent}\nMood: ${inputs.tone}`;
 
             try {
-                const res = await fetch(LOCAL_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        userQuery: userQuery, 
-                        systemPrompt: systemPrompt 
-                    })
-                });
+            
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    userQuery: userQuery, 
+                    systemPrompt: systemPrompt 
+                })
+            });
 
                 if (!res.ok) throw new Error("Server communication failed.");
 
@@ -321,4 +322,5 @@ const API_URL = window.location.hostname === 'localhost'
         }
     </script>
 </body>
+
 </html>cd
