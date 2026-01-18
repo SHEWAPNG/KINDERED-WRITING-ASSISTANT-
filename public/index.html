@@ -206,121 +206,135 @@
     </footer>
 
     <script>
-        // CONFIGURATION
-        // This tells the app: Use the current website's address to find the API
-const API_URL = window.location.hostname === 'localhost' 
-    ? "http://localhost:6060/api/generate" 
-    : "/api/generate";
+  
+    // CONFIGURATION
+    const API_URL = window.location.hostname === 'localhost' 
+        ? "http://localhost:6060/api/generate" 
+        : "/api/generate";
+    
+    let currentStep = 1;
+
+    function navigateTo(viewId) {
+        document.querySelectorAll('main > section').forEach(s => s.classList.add('step-hidden'));
+        const target = document.getElementById(viewId);
+        target.classList.remove('step-hidden');
+        target.classList.add('fade-in');
         
-        let currentStep = 1;
+        if (viewId === 'view-flow') {
+            document.querySelectorAll('#flow-steps > div').forEach(d => d.classList.add('step-hidden'));
+            document.getElementById('step-1').classList.remove('step-hidden');
+            currentStep = 1;
+        }
+    }
 
-        function navigateTo(viewId) {
-            document.querySelectorAll('main > section').forEach(s => s.classList.add('step-hidden'));
-            const target = document.getElementById(viewId);
-            target.classList.remove('step-hidden');
-            target.classList.add('fade-in');
-            
-            if(viewId === 'view-flow') {
-                document.querySelectorAll('#flow-steps > div').forEach(d => d.classList.add('step-hidden'));
-                document.getElementById('step-1').classList.remove('step-hidden');
-                currentStep = 1;
-            }
+    function nextStep(step) {
+        document.getElementById(`step-${currentStep}`).classList.add('step-hidden');
+        document.getElementById(`step-${step}`).classList.remove('step-hidden');
+        currentStep = step;
+    }
+
+    function prevStep(step) {
+        document.getElementById(`step-${currentStep}`).classList.add('step-hidden');
+        document.getElementById(`step-${step}`).classList.remove('step-hidden');
+        currentStep = step;
+    }
+
+    function selectTone(tone) {
+        document.getElementById('input-tone').value = tone;
+        document.querySelectorAll('.tone-chip').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.trim() === tone);
+        });
+    }
+
+    // Set default tone
+    selectTone('Calm');
+
+    async function generateWriting() {
+        const btn = document.getElementById('generate-btn');
+        const outputDiv = document.getElementById('output-text');
+        const errorBox = document.getElementById('error-box');
+        
+        const inputs = {
+            what: document.getElementById('input-what').value.trim() || "a message",
+            who: document.getElementById('input-who').value.trim() || "someone",
+            intent: document.getElementById('input-intent').value.trim(),
+            tone: document.getElementById('input-tone').value
+        };
+
+        if (!inputs.intent) {
+            errorBox.textContent = "Please share what's on your mind (step 3)";
+            errorBox.classList.remove('hidden');
+            return;
         }
 
-        function nextStep(step) {
-            document.getElementById(`step-${currentStep}`).classList.add('step-hidden');
-            document.getElementById(`step-${step}`).classList.remove('step-hidden');
-            currentStep = step;
-        }
+        btn.disabled = true;
+        btn.innerHTML = `<span class="loading-dots">Thinking gently</span>`;
+        errorBox.classList.add('hidden');
 
-        function prevStep(step) {
-            document.getElementById(`step-${currentStep}`).classList.add('step-hidden');
-            document.getElementById(`step-${step}`).classList.remove('step-hidden');
-            currentStep = step;
-        }
+        const systemPrompt = 
+            `You are Kindred, a writing companion. ` +
+            `Your goal is to turn messy human thoughts into empathetic, clear messages. ` +
+            `Avoid corporate jargon. Be vulnerable and direct. ` +
+            `Tone: ${inputs.tone}.`;
 
-        function selectTone(tone) {
-            document.getElementById('input-tone').value = tone;
-            document.querySelectorAll('.tone-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText === tone);
-            });
-        }
+        const userQuery = 
+            `Write: ${inputs.what}\n` +
+            `To: ${inputs.who}\n` +
+            `Context: ${inputs.intent}\n` +
+            `Mood/Tone: ${inputs.tone}`;
 
-        selectTone('Calm');
+        try {
+            console.log("→ Sending request to:", API_URL);
+            console.log("→ Payload:", { userQuery, systemPrompt });
 
-        async function generateWriting() {
-            const btn = document.getElementById('generate-btn');
-            const outputDiv = document.getElementById('output-text');
-            const errorBox = document.getElementById('error-box');
-            
-            const inputs = {
-                what: document.getElementById('input-what').value || "a message",
-                who: document.getElementById('input-who').value || "someone",
-                intent: document.getElementById('input-intent').value,
-                tone: document.getElementById('input-tone').value
-            };
-
-            if(!inputs.intent) {
-                errorBox.innerText = "Please share a little bit about what's on your mind.";
-                errorBox.classList.remove('hidden');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="loading-dots">Thinking gently</span>`;
-            errorBox.classList.add('hidden');
-
-            // --- THE CORE FIX ---
-            const systemPrompt = `You are Kindred, a writing companion. Your goal is to turn messy human thoughts into empathetic, clear messages. Avoid corporate jargon. Be vulnerable and direct. Tone: ${inputs.tone}.`;
-            const userQuery = `Write: ${inputs.what}\nTo: ${inputs.who}\nContext: ${inputs.intent}\nMood: ${inputs.tone}`;
-
-            try {
-            
-            const res = await fetch('/api/generate', {
+            const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    userQuery: userQuery, 
-                    systemPrompt: systemPrompt 
-                })
+                body: JSON.stringify({ userQuery, systemPrompt })
             });
 
-                if (!res.ok) throw new Error("Server communication failed.");
+            console.log("→ Response status:", res.status);
 
-                const data = await res.json();
-                
-                if (data.text) {
-                    outputDiv.innerText = data.text.trim();
-                    navigateTo('view-result');
-                } else {
-                    throw new Error(data.error || "Gemini returned an empty response.");
-                }
-
-            } catch (err) {
-                console.error("Technical Error:", err);
-                errorBox.classList.remove('hidden');
-                errorBox.innerText = "Connection failed. Please ensure your backend server is running on port 6060.";
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "Help me find the words";
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Server error ${res.status} — ${errorText}`);
             }
-        }
 
-        function copyToClipboard() {
-            const text = document.getElementById('output-text').innerText;
-            const dummy = document.createElement("textarea");
-            document.body.appendChild(dummy);
-            dummy.value = text;
-            dummy.select();
-            document.execCommand("copy");
-            document.body.removeChild(dummy);
+            const data = await res.json();
             
-            const copyBtn = document.getElementById('copy-btn');
-            const originalText = copyBtn.innerHTML;
-            copyBtn.innerHTML = "Saved to Clipboard ✨";
-            setTimeout(() => copyBtn.innerHTML = originalText, 2500);
-        }
-    </script>
-</body>
+            if (data?.text?.trim()) {
+                outputDiv.textContent = data.text.trim();
+                navigateTo('view-result');
+            } else {
+                throw new Error("AI returned empty or invalid response");
+            }
 
-</html>cd
+        } catch (err) {
+            console.error("Generate error:", err);
+            errorBox.textContent = err.message.includes('6060') 
+                ? "Backend server appears to be offline (port 6060)"
+                : "Something went wrong – check browser console for details";
+            errorBox.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Help me find the words";
+        }
+    }
+
+    function copyToClipboard() {
+        const text = document.getElementById('output-text').textContent;
+        if (!text) return;
+
+        navigator.clipboard.writeText(text).then(() => {
+            const copyBtn = document.getElementById('copy-btn');
+            const original = copyBtn.innerHTML;
+            copyBtn.innerHTML = "Copied! ✨";
+            setTimeout(() => copyBtn.innerHTML = original, 2200);
+        }).catch(err => {
+            console.error("Clipboard failed:", err);
+        });
+    }
+</script>
+      
+</body>
+</html>
