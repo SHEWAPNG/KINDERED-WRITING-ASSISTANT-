@@ -97,6 +97,16 @@
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
+
+        /* Typewriter Cursor Effect */
+        .typing::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: var(--accent-rose);
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-6">
@@ -185,18 +195,33 @@
 
         <section id="view-result" class="step-hidden space-y-8">
             <div class="glass-card p-10 rounded-[2.5rem] shadow-2xl shadow-rose-200/30 border-white flex flex-col justify-between">
-                <div id="output-text" class="text-xl leading-relaxed text-stone-700 serif min-h-[120px] whitespace-pre-wrap"></div>
-                <div class="mt-12 pt-8 border-t border-stone-200/50 flex flex-col sm:flex-row gap-6 justify-between items-center">
-                    <button onclick="copyToClipboard()" id="copy-btn" class="btn-lovable px-8 py-3 rounded-full text-sm font-medium flex items-center gap-2">
-                        Copy to Clipboard
-                    </button>
-                    <button onclick="navigateTo('view-flow')" class="text-sm text-stone-400 font-medium hover:text-rose-400 transition-colors">Start a new draft</button>
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span id="word-count-badge" class="text-[10px] uppercase tracking-widest bg-stone-100 text-stone-400 px-2 py-1 rounded">0 Words</span>
+                    </div>
+                    <div id="output-text" class="text-xl leading-relaxed text-stone-700 serif min-h-[120px] whitespace-pre-wrap"></div>
+                </div>
+                
+                <div class="mt-12 pt-8 border-t border-stone-200/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="copyToClipboard()" id="copy-btn" class="btn-lovable flex-1 sm:flex-none px-6 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2">
+                            Copy
+                        </button>
+                        <button onclick="generateWriting()" id="regen-btn" class="bg-white border border-stone-200 text-stone-600 px-6 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors">
+                            Try Again ↻
+                        </button>
+                    </div>
+                    <button onclick="navigateTo('view-flow')" class="text-sm text-stone-400 font-medium hover:text-rose-400 transition-colors">New Draft</button>
                 </div>
             </div>
             <div id="error-box" class="hidden p-4 bg-red-50 text-red-600 rounded-xl text-center text-sm"></div>
         </section>
 
     </main>
+
+    <footer class="fixed bottom-8 text-stone-400 text-[10px] uppercase tracking-[0.2em] font-bold">
+        Designed for Humans • Clarity & Empathy
+    </footer>
 
     <script>
     const API_URL = window.location.hostname === 'localhost' 
@@ -233,16 +258,41 @@
     function selectTone(tone) {
         document.getElementById('input-tone').value = tone;
         document.querySelectorAll('.tone-chip').forEach(btn => {
-            // Check if the onclick attribute contains the tone string
             btn.classList.toggle('active', btn.getAttribute('onclick').includes(tone));
         });
     }
 
-    // Default select
+    // Typewriter Function
+    function typeWriter(text, elementId, speed = 20) {
+        const element = document.getElementById(elementId);
+        element.textContent = "";
+        element.classList.add('typing');
+        let i = 0;
+        
+        function type() {
+            if (i < text.length) {
+                element.textContent += text.charAt(i);
+                i++;
+                // Update word count while typing
+                updateWordCount(element.textContent);
+                setTimeout(type, speed);
+            } else {
+                element.classList.remove('typing');
+            }
+        }
+        type();
+    }
+
+    function updateWordCount(text) {
+        const count = text.trim() ? text.trim().split(/\s+/).length : 0;
+        document.getElementById('word-count-badge').textContent = `${count} Words`;
+    }
+
     selectTone('Professional and formal');
 
     async function generateWriting() {
         const btn = document.getElementById('generate-btn');
+        const regenBtn = document.getElementById('regen-btn');
         const outputDiv = document.getElementById('output-text');
         const errorBox = document.getElementById('error-box');
         
@@ -259,7 +309,9 @@
             return;
         }
 
+        // Loading states
         btn.disabled = true;
+        regenBtn.disabled = true;
         btn.innerHTML = `<span class="loading-dots">Thinking gently</span>`;
         errorBox.classList.add('hidden');
 
@@ -269,11 +321,7 @@
             `TONE: You must write in a ${inputs.tone} style. ` +
             `Be human, direct, and avoid corporate clichés.`;
 
-        const userQuery = 
-            `Draft: ${inputs.what}\n` +
-            `To: ${inputs.who}\n` +
-            `Context: ${inputs.intent}\n` +
-            `Style: ${inputs.tone}`;
+        const userQuery = `Task: ${inputs.what} to ${inputs.who}. Context: ${inputs.intent}. Tone: ${inputs.tone}`;
 
         try {
             const res = await fetch(API_URL, {
@@ -286,14 +334,15 @@
             if (!res.ok) throw new Error(data.error || "Server error");
 
             if (data?.text?.trim()) {
-                outputDiv.textContent = data.text.trim();
                 navigateTo('view-result');
+                typeWriter(data.text.trim(), 'output-text');
             }
         } catch (err) {
             errorBox.textContent = err.message;
             errorBox.classList.remove('hidden');
         } finally {
             btn.disabled = false;
+            regenBtn.disabled = false;
             btn.textContent = "Help me find the words";
         }
     }
