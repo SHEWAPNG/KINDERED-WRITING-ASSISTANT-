@@ -54,7 +54,6 @@
             box-shadow: 0 4px 14px rgba(255, 138, 138, 0.3);
         }
 
-        /* GEMINI SHIMMER EFFECT */
         @keyframes shimmer {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
@@ -73,7 +72,15 @@
             transition: all 0.2s ease;
         }
         body.dark .tone-chip { background: #2D2626; color: white; border-color: rgba(255,255,255,0.1); }
-        .tone-chip.active { background-color: var(--accent-rose) !important; color: white !important; border-color: var(--accent-rose) !important; transform: scale(1.05); }
+        
+        /* High-visibility Active State */
+        .tone-chip.active { 
+            background-color: var(--accent-rose) !important; 
+            color: white !important; 
+            border-color: var(--accent-rose) !important; 
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(255, 138, 138, 0.2);
+        }
 
         .input-underline {
             background: transparent;
@@ -166,7 +173,6 @@
                 </div>
             </div>
         </section>
-
     </main>
 
     <script>
@@ -202,10 +208,16 @@
         currentStep = step;
     }
 
+    // FIXED: Selecting the Persuasive pill now works correctly
     function selectTone(tone) {
         document.getElementById('input-tone').value = tone;
-        document.querySelectorAll('.tone-chip').forEach(btn => {
-            btn.classList.toggle('active', tone.startsWith(btn.textContent));
+        const buttons = document.querySelectorAll('.tone-chip');
+        buttons.forEach(btn => {
+            if (tone.toLowerCase().includes(btn.textContent.toLowerCase())) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
         });
     }
     
@@ -234,7 +246,6 @@
     async function generateWriting() {
         const btn = document.getElementById('generate-btn');
         const outputDiv = document.getElementById('output-text');
-        
         const inputs = {
             what: document.getElementById('input-what').value,
             who: document.getElementById('input-who').value,
