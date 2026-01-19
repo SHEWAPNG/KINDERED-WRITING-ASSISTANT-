@@ -14,16 +14,12 @@
             --accent-rose: #FF8A8A;
             --text-main: #3D2B2B;
             --glass: rgba(255, 255, 255, 0.6);
-            --card-border: rgba(255, 255, 255, 0.3);
         }
 
-        /* MIDNIGHT MODE THEME */
         body.dark {
             --bg-main: #1A1616;
-            --accent-rose: #FF8A8A;
             --text-main: #F5EBEB;
             --glass: rgba(45, 38, 38, 0.7);
-            --card-border: rgba(255, 138, 138, 0.2);
             background-image: 
                 radial-gradient(at 0% 0%, hsla(353,20%,15%,1) 0, transparent 50%), 
                 radial-gradient(at 50% 100%, hsla(353,30%,10%,1) 0, transparent 50%) !important;
@@ -36,46 +32,51 @@
                 radial-gradient(at 50% 100%, hsla(22,100%,94%,1) 0, transparent 50%);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            transition: background 0.5s ease, color 0.5s ease;
+            transition: all 0.5s ease;
             min-height: 100vh;
         }
 
         h1, h2, .serif { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
         .step-hidden { display: none; }
-        .fade-in { animation: fadeIn 0.8s forwards; }
+        .fade-in { animation: fadeIn 0.6s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .glass-card {
             background: var(--glass);
             backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .btn-lovable {
             background-color: var(--accent-rose);
             color: white;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(255, 138, 138, 0.3);
         }
-        .btn-lovable:hover { transform: scale(1.02); background-color: #ff7575; }
 
         .tone-chip {
             background: white;
             border: 1px solid rgba(61, 43, 43, 0.1);
             color: #3D2B2B;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
         body.dark .tone-chip { background: #2D2626; color: white; border-color: rgba(255,255,255,0.1); }
-        
-        .tone-chip.active { background-color: var(--accent-rose); color: white; border-color: var(--accent-rose); }
-
-        .tab-btn { color: #A08E8E; border-bottom: 2px solid transparent; }
-        .tab-btn.active { color: var(--accent-rose); border-bottom-color: var(--accent-rose); }
+        .tone-chip.active { background-color: var(--accent-rose) !important; color: white !important; border-color: var(--accent-rose) !important; transform: scale(1.05); }
 
         .input-underline {
             background: transparent;
+            border: none;
             border-bottom: 2px solid rgba(61, 43, 43, 0.1);
             color: var(--text-main);
         }
-        body.dark .input-underline { border-bottom-color: rgba(255,255,255,0.1); }
+        
+        .typing::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: var(--accent-rose);
+        }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-6">
@@ -85,43 +86,20 @@
             <span class="text-rose-400">❤</span> Kindred
         </div>
         <button onclick="toggleTheme()" class="glass-card p-3 rounded-full hover:scale-110 transition-transform">
-            <span id="theme-icon" class="text-xl">🌙</span>
+            <span id="theme-icon">🌙</span>
         </button>
     </header>
 
     <main id="app-container" class="w-full max-w-2xl relative z-10">
         
-        <section id="view-home" class="text-center space-y-16 fade-in pt-12">
-            <div class="space-y-6">
-                <div class="inline-block px-4 py-1.5 rounded-full bg-white/20 border border-rose-200 text-rose-400 text-sm font-medium">
-                    The world's kindest writing assistant.
-                </div>
-                <h1 class="text-6xl md:text-8xl font-medium leading-tight">
-                    Find the words <br><span class="italic text-rose-400">your heart</span> wants.
-                </h1>
-                <p class="text-lg md:text-xl opacity-70 max-w-lg mx-auto">
-                    Kindred transforms messy, frustrated thoughts into clear, communication.
-                </p>
-                <div class="pt-4">
-                    <button onclick="navigateTo('view-flow')" class="btn-lovable px-12 py-6 rounded-full text-xl font-bold">
-                        Start Writing — It's Free
-                    </button>
-                </div>
-            </div>
-
-            <div class="max-w-xl mx-auto glass-card rounded-[2rem] p-8 text-left shadow-2xl">
-                <div class="space-y-4">
-                    <div class="opacity-40">
-                        <span class="text-[10px] font-bold uppercase tracking-widest block mb-1">Your messy thought:</span>
-                        <p class="serif italic text-sm">"Tell my boss I can't work late without sounding like a slacker."</p>
-                    </div>
-                    <div class="h-[1px] bg-rose-200/20 w-full"></div>
-                    <div>
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-rose-400 block mb-1">Kindred's Magic:</span>
-                        <p class="serif text-md">"I'm focusing on high-quality delivery. I won't be able to stay late tonight, but I'll hit the ground running tomorrow."</p>
-                    </div>
-                </div>
-            </div>
+        <section id="view-home" class="text-center space-y-10 fade-in pt-12">
+            <h1 class="text-5xl md:text-7xl font-medium leading-tight">
+                Find the words <br><span class="italic text-rose-400">your heart</span> wants.
+            </h1>
+            <p class="text-lg opacity-70 max-w-lg mx-auto">Transform messy thoughts into clear communication instantly.</p>
+            <button onclick="navigateTo('view-flow')" class="btn-lovable px-12 py-5 rounded-full text-lg font-medium">
+                Start Writing
+            </button>
         </section>
 
         <section id="view-flow" class="step-hidden space-y-12">
@@ -129,7 +107,7 @@
                 <div id="step-1" class="space-y-6">
                     <h2 class="text-3xl serif">What are you writing?</h2>
                     <input type="text" id="input-what" placeholder="e.g. A text to my neighbor" class="w-full input-underline py-4 text-2xl outline-none">
-                    <button onclick="nextStep(2)" class="text-rose-400 font-bold">Next →</button>
+                    <div class="flex justify-end"><button onclick="nextStep(2)" class="text-rose-400 font-bold">Next →</button></div>
                 </div>
 
                 <div id="step-2" class="step-hidden space-y-6">
@@ -140,7 +118,7 @@
 
                 <div id="step-3" class="step-hidden space-y-6">
                     <h2 class="text-3xl serif">What's on your mind?</h2>
-                    <textarea id="input-intent" rows="4" placeholder="Messy thoughts here..." class="w-full input-underline py-4 text-xl resize-none outline-none"></textarea>
+                    <textarea id="input-intent" rows="4" placeholder="Messy thoughts..." class="w-full input-underline py-4 text-xl resize-none outline-none"></textarea>
                     <div class="flex justify-between"><button onclick="prevStep(2)">← Back</button><button onclick="nextStep(4)" class="text-rose-400 font-bold">Next →</button></div>
                 </div>
 
@@ -151,6 +129,7 @@
                         <button onclick="selectTone('Friendly and casual')" class="tone-chip px-6 py-3 rounded-full text-sm">Friendly</button>
                         <button onclick="selectTone('Bold and persuasive')" class="tone-chip px-6 py-3 rounded-full text-sm">Persuasive</button>
                         <button onclick="selectTone('Creative and witty')" class="tone-chip px-6 py-3 rounded-full text-sm">Creative</button>
+                        <button onclick="selectTone('Academic and detailed')" class="tone-chip px-6 py-3 rounded-full text-sm">Academic</button>
                         <button onclick="selectTone('Empathetic and kind')" class="tone-chip px-6 py-3 rounded-full text-sm">Empathetic</button>
                     </div>
                     <input type="hidden" id="input-tone" value="Professional and formal">
@@ -161,37 +140,31 @@
 
         <section id="view-result" class="step-hidden space-y-8">
             <div class="glass-card p-10 rounded-[2.5rem]">
-                <div class="flex gap-6 mb-8 border-b border-rose-200/10">
-                    <button onclick="switchOption(0)" id="tab-0" class="tab-btn pb-2 text-sm active font-bold uppercase">Option 1</button>
-                    <button onclick="switchOption(1)" id="tab-1" class="tab-btn pb-2 text-sm font-bold uppercase">Option 2</button>
-                    <button onclick="switchOption(2)" id="tab-2" class="tab-btn pb-2 text-sm font-bold uppercase">Option 3</button>
+                <div class="flex justify-between items-center mb-6">
+                    <span id="word-count-badge" class="text-[10px] uppercase tracking-widest bg-stone-100 dark:bg-stone-800 px-3 py-1.5 rounded-full font-bold">0 Words</span>
                 </div>
-                <div id="output-text" class="text-xl leading-relaxed serif min-h-[180px] whitespace-pre-wrap"></div>
-                <div class="mt-10 pt-8 border-t border-rose-200/10 flex gap-4">
-                    <button onclick="copyToClipboard()" id="copy-btn" class="btn-lovable flex-1 px-8 py-4 rounded-full font-bold">Copy Selected</button>
+                <div id="output-text" class="text-xl leading-relaxed serif min-h-[150px] whitespace-pre-wrap"></div>
+                <div class="mt-10 pt-8 border-t border-rose-200/10 flex gap-4 items-center">
+                    <button onclick="copyToClipboard()" id="copy-btn" class="btn-lovable flex-1 px-8 py-4 rounded-full font-bold">Copy Text</button>
+                    <button onclick="generateWriting()" id="regen-btn" class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-6 py-4 rounded-full text-sm font-bold">Try Again ↻</button>
                     <button onclick="navigateTo('view-flow')" class="text-sm opacity-50">New Draft</button>
                 </div>
             </div>
         </section>
+
     </main>
 
     <script>
     const API_URL = "/api/generate";
     let currentStep = 1;
-    let variations = ["", "", ""];
-    let activeIndex = 0;
 
-    // THEME LOGIC
     function toggleTheme() {
-        const body = document.body;
-        const icon = document.getElementById('theme-icon');
-        body.classList.toggle('dark');
-        const isDark = body.classList.contains('dark');
-        icon.textContent = isDark ? '☀️' : '🌙';
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
         localStorage.setItem('kindred-theme', isDark ? 'dark' : 'light');
     }
 
-    // Load saved theme
     if (localStorage.getItem('kindred-theme') === 'dark') {
         document.body.classList.add('dark');
         document.getElementById('theme-icon').textContent = '☀️';
@@ -216,17 +189,39 @@
 
     function selectTone(tone) {
         document.getElementById('input-tone').value = tone;
-        document.querySelectorAll('.tone-chip').forEach(btn => btn.classList.toggle('active', btn.textContent === tone.split(' ')[0]));
+        document.querySelectorAll('.tone-chip').forEach(btn => {
+            // Check if the tone full string matches the button text
+            btn.classList.toggle('active', tone.startsWith(btn.textContent));
+        });
     }
+    
+    selectTone('Professional and formal');
 
-    function switchOption(index) {
-        activeIndex = index;
-        document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-        document.getElementById('output-text').textContent = variations[index];
+    function typeWriter(text, elementId, speed = 15) {
+        const element = document.getElementById(elementId);
+        element.textContent = "";
+        element.classList.add('typing');
+        let i = 0;
+        
+        function type() {
+            if (i < text.length) {
+                element.textContent += text.charAt(i);
+                i++;
+                const count = element.textContent.trim() ? element.textContent.trim().split(/\s+/).length : 0;
+                document.getElementById('word-count-badge').textContent = `${count} Words`;
+                setTimeout(type, speed);
+            } else {
+                element.classList.remove('typing');
+            }
+        }
+        type();
     }
 
     async function generateWriting() {
         const btn = document.getElementById('generate-btn');
+        const regenBtn = document.getElementById('regen-btn');
+        const outputDiv = document.getElementById('output-text');
+        
         const inputs = {
             what: document.getElementById('input-what').value,
             who: document.getElementById('input-who').value,
@@ -237,23 +232,31 @@
         btn.disabled = true;
         btn.innerHTML = "Thinking...";
 
-        const systemPrompt = `You are Kindred. Give exactly 3 variations for the requested message in a ${inputs.tone} tone. Separate them ONLY with the marker "---".`;
-        const userQuery = `Task: ${inputs.what} to ${inputs.who}. Messy thoughts: ${inputs.intent}`;
-
         try {
-            const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userQuery, systemPrompt }) });
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    userQuery: `Task: ${inputs.what} to ${inputs.who}. Context: ${inputs.intent}`, 
+                    systemPrompt: `You are Kindred. Write in a ${inputs.tone} tone. Be direct and helpful.` 
+                })
+            });
             const data = await res.json();
-            variations = data.text.split('---').map(t => t.trim());
             navigateTo('view-result');
-            switchOption(0);
-        } catch (err) { alert("Something went wrong."); } finally { btn.disabled = false; btn.innerHTML = "Find the words"; }
+            typeWriter(data.text.trim(), 'output-text');
+        } catch (err) {
+            alert("Error.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = "Find the words";
+        }
     }
 
     function copyToClipboard() {
-        navigator.clipboard.writeText(variations[activeIndex]).then(() => {
+        navigator.clipboard.writeText(document.getElementById('output-text').textContent).then(() => {
             const btn = document.getElementById('copy-btn');
             btn.textContent = "Saved! ✨";
-            setTimeout(() => btn.textContent = "Copy Selected", 2000);
+            setTimeout(() => btn.textContent = "Copy Text", 2000);
         });
     }
     </script>
