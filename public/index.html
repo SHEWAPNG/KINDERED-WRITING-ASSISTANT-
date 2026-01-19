@@ -50,8 +50,19 @@
         .btn-lovable {
             background-color: var(--accent-rose);
             color: white;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 4px 14px rgba(255, 138, 138, 0.3);
+        }
+
+        /* GEMINI SHIMMER EFFECT */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-btn {
+            background: linear-gradient(90deg, #FF8A8A, #ffb3b3, #FF8A8A);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
         }
 
         .tone-chip {
@@ -96,7 +107,9 @@
             <h1 class="text-5xl md:text-7xl font-medium leading-tight">
                 Find the words <br><span class="italic text-rose-400">your heart</span> wants.
             </h1>
-            <p class="text-lg opacity-70 max-w-lg mx-auto">Turning 'I don't know how to say this' into the perfect message.</p>
+            <p class="text-lg md:text-xl opacity-70 max-w-lg mx-auto leading-relaxed">
+                Turning "I don't know how to say this" into the perfect message.
+            </p>
             <button onclick="navigateTo('view-flow')" class="btn-lovable px-12 py-5 rounded-full text-lg font-medium">
                 Start Writing
             </button>
@@ -133,7 +146,9 @@
                         <button onclick="selectTone('Empathetic and kind')" class="tone-chip px-6 py-3 rounded-full text-sm">Empathetic</button>
                     </div>
                     <input type="hidden" id="input-tone" value="Professional and formal">
-                    <button id="generate-btn" onclick="generateWriting()" class="btn-lovable text-white px-12 py-5 rounded-full text-lg font-bold w-full">Help me find the words</button>
+                    <button id="generate-btn" onclick="generateWriting()" class="btn-lovable text-white px-12 py-5 rounded-full text-lg font-bold w-full">
+                        Help me find the words
+                    </button>
                 </div>
             </div>
         </section>
@@ -190,7 +205,6 @@
     function selectTone(tone) {
         document.getElementById('input-tone').value = tone;
         document.querySelectorAll('.tone-chip').forEach(btn => {
-            // Check if the tone full string matches the button text
             btn.classList.toggle('active', tone.startsWith(btn.textContent));
         });
     }
@@ -219,7 +233,6 @@
 
     async function generateWriting() {
         const btn = document.getElementById('generate-btn');
-        const regenBtn = document.getElementById('regen-btn');
         const outputDiv = document.getElementById('output-text');
         
         const inputs = {
@@ -230,7 +243,8 @@
         };
 
         btn.disabled = true;
-        btn.innerHTML = "Thinking...";
+        btn.classList.add('shimmer-btn');
+        btn.innerHTML = "Finding the words...";
 
         try {
             const res = await fetch(API_URL, {
@@ -248,7 +262,8 @@
             alert("Error.");
         } finally {
             btn.disabled = false;
-            btn.innerHTML = "Find the words";
+            btn.classList.remove('shimmer-btn');
+            btn.innerHTML = "Help me find the words";
         }
     }
 
@@ -262,5 +277,3 @@
     </script>
 </body>
 </html>
-
-
