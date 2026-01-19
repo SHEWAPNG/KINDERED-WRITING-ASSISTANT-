@@ -153,7 +153,7 @@
                     <label class="text-sm uppercase tracking-widest text-rose-400 font-bold">Step 3 of 4</label>
                     <h2 class="text-3xl serif">What's on your mind?</h2>
                     <p class="text-sm text-stone-500 mb-2 italic">Just write it messy. We'll clean it up for you.</p>
-                    <textarea id="input-intent" rows="4" placeholder="I'm frustrated because they are being too loud after 10 PM but I don't want to be mean..." 
+                    <textarea id="input-intent" rows="4" placeholder="I'm frustrated because they are being too loud..." 
                               class="w-full input-underline py-4 text-xl resize-none placeholder:text-stone-300"></textarea>
                     <div class="flex justify-between pt-6">
                         <button onclick="prevStep(2)" class="text-stone-400 font-medium">← Back</button>
@@ -165,13 +165,14 @@
                     <label class="text-sm uppercase tracking-widest text-rose-400 font-bold">Final Step</label>
                     <h2 class="text-3xl serif">How should it sound?</h2>
                     <div class="flex flex-wrap justify-center gap-3">
-                        <button onclick="selectTone('Calm')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Calm</button>
-                        <button onclick="selectTone('Professional')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Professional</button>
-                        <button onclick="selectTone('Warm')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Warm</button>
-                        <button onclick="selectTone('Firm')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Firm</button>
-                        <button onclick="selectTone('Honest')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Honest</button>
+                        <button onclick="selectTone('Professional and formal')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Professional</button>
+                        <button onclick="selectTone('Friendly and casual')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Friendly</button>
+                        <button onclick="selectTone('Bold and persuasive')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Persuasive</button>
+                        <button onclick="selectTone('Creative and witty')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Creative</button>
+                        <button onclick="selectTone('Academic and detailed')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Academic</button>
+                        <button onclick="selectTone('Empathetic and kind')" class="tone-btn tone-chip px-6 py-3 rounded-full text-sm font-medium">Empathetic</button>
                     </div>
-                    <input type="hidden" id="input-tone" value="Calm">
+                    <input type="hidden" id="input-tone" value="Professional and formal">
                     <div class="pt-8 flex flex-col items-center">
                         <button id="generate-btn" onclick="generateWriting()" class="btn-lovable text-white px-12 py-5 rounded-full text-lg font-medium w-full">
                             Help me find the words
@@ -187,27 +188,17 @@
                 <div id="output-text" class="text-xl leading-relaxed text-stone-700 serif min-h-[120px] whitespace-pre-wrap"></div>
                 <div class="mt-12 pt-8 border-t border-stone-200/50 flex flex-col sm:flex-row gap-6 justify-between items-center">
                     <button onclick="copyToClipboard()" id="copy-btn" class="btn-lovable px-8 py-3 rounded-full text-sm font-medium flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                         Copy to Clipboard
                     </button>
                     <button onclick="navigateTo('view-flow')" class="text-sm text-stone-400 font-medium hover:text-rose-400 transition-colors">Start a new draft</button>
                 </div>
             </div>
-            
-            <div id="error-box" class="hidden p-4 bg-red-50 text-red-600 rounded-xl text-center text-sm">
-                Something went wrong. Make sure your local server is running!
-            </div>
+            <div id="error-box" class="hidden p-4 bg-red-50 text-red-600 rounded-xl text-center text-sm"></div>
         </section>
 
     </main>
 
-    <footer class="fixed bottom-8 text-stone-400 text-[10px] uppercase tracking-[0.2em] font-bold">
-        Designed for Humans • Clarity & Empathy
-    </footer>
-
     <script>
-  
-    // CONFIGURATION
     const API_URL = window.location.hostname === 'localhost' 
         ? "http://localhost:6060/api/generate" 
         : "/api/generate";
@@ -242,12 +233,13 @@
     function selectTone(tone) {
         document.getElementById('input-tone').value = tone;
         document.querySelectorAll('.tone-chip').forEach(btn => {
-            btn.classList.toggle('active', btn.textContent.trim() === tone);
+            // Check if the onclick attribute contains the tone string
+            btn.classList.toggle('active', btn.getAttribute('onclick').includes(tone));
         });
     }
 
-    // Set default tone
-    selectTone('Calm');
+    // Default select
+    selectTone('Professional and formal');
 
     async function generateWriting() {
         const btn = document.getElementById('generate-btn');
@@ -273,47 +265,32 @@
 
         const systemPrompt = 
             `You are Kindred, a writing companion. ` +
-            `Your goal is to turn messy human thoughts into empathetic, clear messages. ` +
-            `Avoid corporate jargon. Be vulnerable and direct. ` +
-            `Tone: ${inputs.tone}.`;
+            `STRICT DIRECTIVE: Follow user instructions EXACTLY. If the user asks for a count (like 5 ideas), give exactly that many. ` +
+            `TONE: You must write in a ${inputs.tone} style. ` +
+            `Be human, direct, and avoid corporate clichés.`;
 
         const userQuery = 
-            `Write: ${inputs.what}\n` +
+            `Draft: ${inputs.what}\n` +
             `To: ${inputs.who}\n` +
             `Context: ${inputs.intent}\n` +
-            `Mood/Tone: ${inputs.tone}`;
+            `Style: ${inputs.tone}`;
 
         try {
-            console.log("→ Sending request to:", API_URL);
-            console.log("→ Payload:", { userQuery, systemPrompt });
-
             const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userQuery, systemPrompt })
             });
 
-            console.log("→ Response status:", res.status);
-
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`Server error ${res.status} — ${errorText}`);
-            }
-
             const data = await res.json();
-            
+            if (!res.ok) throw new Error(data.error || "Server error");
+
             if (data?.text?.trim()) {
                 outputDiv.textContent = data.text.trim();
                 navigateTo('view-result');
-            } else {
-                throw new Error("AI returned empty or invalid response");
             }
-
         } catch (err) {
-            console.error("Generate error:", err);
-            errorBox.textContent = err.message.includes('6060') 
-                ? "Backend server appears to be offline (port 6060)"
-                : "Something went wrong – check browser console for details";
+            errorBox.textContent = err.message;
             errorBox.classList.remove('hidden');
         } finally {
             btn.disabled = false;
@@ -322,19 +299,18 @@
     }
 
     function copyToClipboard() {
-        const text = document.getElementById('output-text').textContent;
-        if (!text) return;
-
+        const text = document.getElementById('output-text').innerText;
         navigator.clipboard.writeText(text).then(() => {
             const copyBtn = document.getElementById('copy-btn');
             const original = copyBtn.innerHTML;
             copyBtn.innerHTML = "Copied! ✨";
-            setTimeout(() => copyBtn.innerHTML = original, 2200);
-        }).catch(err => {
-            console.error("Clipboard failed:", err);
+            copyBtn.classList.add('bg-green-400');
+            setTimeout(() => {
+                copyBtn.innerHTML = original;
+                copyBtn.classList.remove('bg-green-400');
+            }, 2000);
         });
     }
-</script>
-      
+    </script>
 </body>
 </html>
