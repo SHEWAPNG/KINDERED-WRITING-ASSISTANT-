@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kindred | Say what you mean.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -34,6 +35,7 @@
             font-family: 'Inter', sans-serif;
             transition: all 0.5s ease;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         h1, h2, .serif { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
@@ -51,7 +53,13 @@
             background-color: var(--accent-rose);
             color: white;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 14px rgba(255, 138, 138, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
+            opacity: 0.6;
         }
 
         @keyframes shimmer {
@@ -72,21 +80,14 @@
             transition: all 0.2s ease;
         }
         body.dark .tone-chip { background: #2D2626; color: white; border-color: rgba(255,255,255,0.1); }
-        
-        /* High-visibility Active State */
-        .tone-chip.active { 
-            background-color: var(--accent-rose) !important; 
-            color: white !important; 
-            border-color: var(--accent-rose) !important; 
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(255, 138, 138, 0.2);
-        }
+        .tone-chip.active { background-color: var(--accent-rose) !important; color: white !important; border-color: var(--accent-rose) !important; }
 
         .input-underline {
             background: transparent;
             border: none;
             border-bottom: 2px solid rgba(61, 43, 43, 0.1);
             color: var(--text-main);
+            border-radius: 0;
         }
         
         .typing::after {
@@ -95,12 +96,20 @@
             color: var(--accent-rose);
         }
         @keyframes blink { 50% { opacity: 0; } }
+
+        #word-count-badge {
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            opacity: 0.4;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-6">
+<body class="flex flex-col min-h-screen">
 
-    <header class="fixed top-0 w-full p-8 flex justify-between items-center z-50">
-        <div class="text-2xl serif font-medium cursor-pointer" onclick="window.location.reload()">
+    <header class="w-full p-6 md:p-10 flex justify-between items-center z-50">
+        <div class="text-xl md:text-2xl serif font-medium cursor-pointer" onclick="window.location.reload()">
             <span class="text-rose-400">❤</span> Kindred
         </div>
         <button onclick="toggleTheme()" class="glass-card p-3 rounded-full hover:scale-110 transition-transform">
@@ -108,72 +117,140 @@
         </button>
     </header>
 
-    <main id="app-container" class="w-full max-w-2xl relative z-10">
-        
-        <section id="view-home" class="text-center space-y-10 fade-in pt-12">
-            <h1 class="text-5xl md:text-7xl font-medium leading-tight">
-                Find the words <br><span class="italic text-rose-400">your heart</span> wants.
-            </h1>
-            <p class="text-lg md:text-xl opacity-70 max-w-lg mx-auto leading-relaxed">
-                Turning "I don't know how to say this" into the perfect message.
-            </p>
-            <button onclick="navigateTo('view-flow')" class="btn-lovable px-12 py-5 rounded-full text-lg font-medium">
-                Start Writing
-            </button>
-        </section>
-
-        <section id="view-flow" class="step-hidden space-y-12">
-            <div class="glass-card p-10 rounded-[2.5rem] shadow-xl">
-                <div id="step-1" class="space-y-6">
-                    <h2 class="text-3xl serif">What are you writing?</h2>
-                    <input type="text" id="input-what" placeholder="e.g. A text to my neighbor" class="w-full input-underline py-4 text-2xl outline-none">
-                    <div class="flex justify-end"><button onclick="nextStep(2)" class="text-rose-400 font-bold">Next →</button></div>
-                </div>
-
-                <div id="step-2" class="step-hidden space-y-6">
-                    <h2 class="text-3xl serif">Who is receiving this?</h2>
-                    <input type="text" id="input-who" placeholder="e.g. My landlord..." class="w-full input-underline py-4 text-2xl outline-none">
-                    <div class="flex justify-between"><button onclick="prevStep(1)">← Back</button><button onclick="nextStep(3)" class="text-rose-400 font-bold">Next →</button></div>
-                </div>
-
-                <div id="step-3" class="step-hidden space-y-6">
-                    <h2 class="text-3xl serif">What's on your mind?</h2>
-                    <textarea id="input-intent" rows="4" placeholder="Messy thoughts..." class="w-full input-underline py-4 text-xl resize-none outline-none"></textarea>
-                    <div class="flex justify-between"><button onclick="prevStep(2)">← Back</button><button onclick="nextStep(4)" class="text-rose-400 font-bold">Next →</button></div>
-                </div>
-
-                <div id="step-4" class="step-hidden space-y-8 text-center">
-                    <h2 class="text-3xl serif">How should it sound?</h2>
-                    <div class="flex flex-wrap justify-center gap-3">
-                        <button onclick="selectTone('Professional and formal')" class="tone-chip px-6 py-3 rounded-full text-sm">Professional</button>
-                        <button onclick="selectTone('Friendly and casual')" class="tone-chip px-6 py-3 rounded-full text-sm">Friendly</button>
-                        <button onclick="selectTone('Bold and persuasive')" class="tone-chip px-6 py-3 rounded-full text-sm">Persuasive</button>
-                        <button onclick="selectTone('Creative and witty')" class="tone-chip px-6 py-3 rounded-full text-sm">Creative</button>
-                        <button onclick="selectTone('Academic and detailed')" class="tone-chip px-6 py-3 rounded-full text-sm">Academic</button>
-                        <button onclick="selectTone('Empathetic and kind')" class="tone-chip px-6 py-3 rounded-full text-sm">Empathetic</button>
-                    </div>
-                    <input type="hidden" id="input-tone" value="Professional and formal">
-                    <button id="generate-btn" onclick="generateWriting()" class="btn-lovable text-white px-12 py-5 rounded-full text-lg font-bold w-full">
-                        Help me find the words
+    <main id="app-container" class="flex-grow flex items-center justify-center w-full px-4 pb-12">
+        <div class="w-full max-w-2xl">
+            
+            <section id="view-home" class="text-center space-y-6 md:space-y-10 fade-in">
+                <h1 class="text-4xl md:text-7xl font-medium leading-tight">
+                    Find the words <br><span class="italic text-rose-400">your heart</span> wants.
+                </h1>
+                <p class="text-base md:text-xl opacity-70 max-w-xs md:max-w-lg mx-auto leading-relaxed">
+                    Turning "I don't know how to say this" into a simple, human message.
+                </p>
+                <div class="pt-4">
+                    <button onclick="navigateTo('view-flow')" class="btn-lovable px-10 py-4 rounded-full text-base md:text-lg font-medium w-full sm:w-auto">
+                        Start Writing
                     </button>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="view-result" class="step-hidden space-y-8">
-            <div class="glass-card p-10 rounded-[2.5rem]">
-                <div class="flex justify-between items-center mb-6">
-                    <span id="word-count-badge" class="text-[10px] uppercase tracking-widest bg-stone-100 dark:bg-stone-800 px-3 py-1.5 rounded-full font-bold">0 Words</span>
+            <section id="view-about" class="step-hidden text-center space-y-8 fade-in">
+                <div class="glass-card p-8 md:p-12 rounded-[3rem] max-w-xl mx-auto shadow-sm">
+                    <h2 class="text-3xl md:text-4xl serif mb-6">The Heart Behind Kindred</h2>
+                    
+                    <div class="space-y-6 text-left opacity-90 leading-relaxed text-sm md:text-base">
+                        <p>
+                            I’ve noticed something about all of us: 
+                            <strong>We know exactly what we want to say, but we struggle to find the words to say it.</strong>
+                        </p>
+                        <p>
+                            You hear it all the time—"I can't really express it, but I know what I mean." 
+                            There is a gap between the heart and the keyboard. We get so caught up in 
+                            trying not to sound "awkward" or "rude" that we end up saying nothing at all.
+                        </p>
+                        <p>
+                            I built Kindred to be that bridge. It’s for the moments when your 
+                            thoughts are messy, but your intent is clear.
+                        </p>
+                        <hr class="border-rose-200/30 my-6">
+                        <p>
+                            I built Kindred because I’ve been there—staring at a blinking cursor, 
+                            feeling the weight of a message that I just couldn't get right.
+                        </p>
+                        <p>
+                            We live in a world of "professional" templates and robotic AI that makes us sound 
+                            like machines. I wanted something different. I wanted a way to stay 
+                            <strong>human</strong> even when I’m behind a screen.
+                        </p>
+                        <p class="italic text-rose-400">
+                            Kindred isn't about perfect grammar; it's about perfect connection.
+                        </p>
+                        <p>
+                            I built this as a bridge for the messy thoughts in our heads, 
+                            helping them land softly in someone else's heart. Thanks for being part of the story.
+                        </p>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-rose-200/20">
+                        <button onclick="navigateTo('view-home')" class="btn-lovable px-10 py-3 rounded-full text-sm font-bold shadow-md">
+                            Back to Writing
+                        </button>
+                    </div>
                 </div>
-                <div id="output-text" class="text-xl leading-relaxed serif min-h-[150px] whitespace-pre-wrap"></div>
-                <div class="mt-10 pt-8 border-t border-rose-200/10 flex gap-4 items-center">
-                    <button onclick="copyToClipboard()" id="copy-btn" class="btn-lovable flex-1 px-8 py-4 rounded-full font-bold">Copy Text</button>
-                    <button onclick="generateWriting()" id="regen-btn" class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-6 py-4 rounded-full text-sm font-bold">Try Again ↻</button>
-                    <button onclick="navigateTo('view-flow')" class="text-sm opacity-50">New Draft</button>
+            </section>
+
+            <section id="view-flow" class="step-hidden">
+                <div class="glass-card p-6 md:p-10 rounded-[2rem] shadow-xl">
+                    <div id="step-1" class="space-y-6">
+                        <h2 class="text-2xl md:text-3xl serif">What are you writing?</h2>
+                        <input type="text" id="input-what" placeholder="e.g. An email to my boss" class="w-full input-underline py-3 text-xl md:text-2xl outline-none">
+                        <div class="flex justify-end"><button onclick="nextStep(2)" class="text-rose-400 font-bold p-2">Next →</button></div>
+                    </div>
+
+                    <div id="step-2" class="step-hidden space-y-6">
+                        <h2 class="text-2xl md:text-3xl serif">Who is receiving this?</h2>
+                        <input type="text" id="input-who" placeholder="e.g. Sarah..." class="w-full input-underline py-3 text-xl md:text-2xl outline-none">
+                        <div class="flex justify-between items-center">
+                            <button onclick="prevStep(1)" class="opacity-50 p-2 text-sm">← Back</button>
+                            <button onclick="nextStep(3)" class="text-rose-400 font-bold p-2">Next →</button>
+                        </div>
+                    </div>
+
+                    <div id="step-3" class="step-hidden space-y-6">
+                        <h2 class="text-2xl md:text-3xl serif">What's on your mind?</h2>
+                        <textarea id="input-intent" rows="3" placeholder="Just type your messy thoughts..." class="w-full input-underline py-3 text-lg md:text-xl resize-none outline-none"></textarea>
+                        <div class="flex justify-between items-center">
+                            <button onclick="prevStep(2)" class="opacity-50 p-2 text-sm">← Back</button>
+                            <button onclick="nextStep(4)" class="text-rose-400 font-bold p-2">Next →</button>
+                        </div>
+                    </div>
+
+                    <div id="step-4" class="step-hidden space-y-8 text-center">
+                        <h2 class="text-2xl md:text-3xl serif">How should it sound?</h2>
+                        <div class="flex flex-wrap justify-center gap-2">
+                            <button onclick="selectTone('Professional')" class="tone-chip px-4 py-2 rounded-full text-xs md:text-sm">Professional</button>
+                            <button onclick="selectTone('Friendly')" class="tone-chip px-4 py-2 rounded-full text-xs md:text-sm">Friendly</button>
+                            <button onclick="selectTone('Direct')" class="tone-chip px-4 py-2 rounded-full text-xs md:text-sm">Direct</button>
+                            <button onclick="selectTone('Creative')" class="tone-chip px-4 py-2 rounded-full text-xs md:text-sm">Creative</button>
+                            <button onclick="selectTone('Kind')" class="tone-chip px-4 py-2 rounded-full text-xs md:text-sm">Kind</button>
+                        </div>
+                        <input type="hidden" id="input-tone" value="Professional">
+                        <button id="generate-btn" onclick="generateWriting()" class="btn-lovable text-white px-8 py-4 rounded-full text-base font-bold w-full mt-4">
+                            Keep it simple
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+
+            <section id="view-result" class="step-hidden">
+                <div class="glass-card p-6 md:p-10 rounded-[2.5rem]">
+                    <div class="flex justify-between items-center mb-4">
+                        <span id="word-count-badge">0 Words</span>
+                        <span class="text-[10px] opacity-30 font-bold tracking-widest">KINDRED SPIRIT</span>
+                    </div>
+                    <div id="output-text" class="text-lg md:text-xl leading-relaxed serif min-h-[150px] whitespace-pre-wrap"></div>
+                    
+                    <div class="mt-8 pt-6 border-t border-rose-200/20 flex flex-col gap-3">
+                        <div class="flex flex-col sm:flex-row gap-3 w-full">
+                            <button onclick="copyToClipboard()" id="copy-btn" class="btn-lovable flex-grow px-6 py-4 rounded-xl text-sm md:text-base font-bold">Copy Text</button>
+                            <button onclick="shareWhatsApp()" class="bg-[#25D366] text-white px-6 py-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                                Share to WhatsApp
+                            </button>
+                        </div>
+                        <button onclick="navigateTo('view-flow')" id="regen-btn" class="btn-outline w-full px-6 py-4 rounded-xl text-xs md:text-sm font-bold">Try Again ↻</button>
+                    </div>
+                    <button onclick="window.location.reload()" class="w-full text-center text-[10px] uppercase tracking-widest opacity-40 mt-6">Start New Draft</button>
+                </div>
+            </section>
+
+        </div>
     </main>
+
+    <footer class="w-full p-8 text-center mt-auto">
+        <button onclick="navigateTo('view-about')" class="text-xs opacity-40 hover:opacity-100 transition-opacity uppercase tracking-widest font-bold">
+            Why I Built <b>Kindred</b>
+        </button> 
+    </footer>
 
     <script>
     const API_URL = "/api/generate";
@@ -192,8 +269,9 @@
     }
 
     function navigateTo(viewId) {
-        document.querySelectorAll('main > section').forEach(s => s.classList.add('step-hidden'));
+        document.querySelectorAll('main section').forEach(s => s.classList.add('step-hidden'));
         document.getElementById(viewId).classList.remove('step-hidden');
+        window.scrollTo(0,0);
     }
 
     function nextStep(step) {
@@ -208,27 +286,18 @@
         currentStep = step;
     }
 
-    // FIXED: Selecting the Persuasive pill now works correctly
     function selectTone(tone) {
         document.getElementById('input-tone').value = tone;
-        const buttons = document.querySelectorAll('.tone-chip');
-        buttons.forEach(btn => {
-            if (tone.toLowerCase().includes(btn.textContent.toLowerCase())) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+        document.querySelectorAll('.tone-chip').forEach(btn => {
+            btn.classList.toggle('active', tone === btn.textContent);
         });
     }
-    
-    selectTone('Professional and formal');
 
-    function typeWriter(text, elementId, speed = 15) {
+    function typeWriter(text, elementId, speed = 8) {
         const element = document.getElementById(elementId);
         element.textContent = "";
         element.classList.add('typing');
         let i = 0;
-        
         function type() {
             if (i < text.length) {
                 element.textContent += text.charAt(i);
@@ -245,45 +314,55 @@
 
     async function generateWriting() {
         const btn = document.getElementById('generate-btn');
-        const outputDiv = document.getElementById('output-text');
-        const inputs = {
-            what: document.getElementById('input-what').value,
-            who: document.getElementById('input-who').value,
-            intent: document.getElementById('input-intent').value,
-            tone: document.getElementById('input-tone').value
-        };
+        const what = document.getElementById('input-what').value.trim();
+        const intent = document.getElementById('input-intent').value.trim();
+        const who = document.getElementById('input-who').value.trim();
+        const tone = document.getElementById('input-tone').value;
+
+        if (!what && !intent) {
+            alert("Give Kindred a few details first!");
+            return;
+        }
 
         btn.disabled = true;
         btn.classList.add('shimmer-btn');
-        btn.innerHTML = "Finding the words...";
+        btn.innerHTML = "Thinking like a human...";
 
         try {
             const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    userQuery: `Task: ${inputs.what} to ${inputs.who}. Context: ${inputs.intent}`, 
-                    systemPrompt: `You are Kindred. Write in a ${inputs.tone} tone. Be direct and helpful.` 
+                    userQuery: `Task: Draft ${what} to ${who}. Details: ${intent}`, 
+                    systemPrompt: tone 
                 })
             });
+
+            if (!res.ok) throw new Error("Server error");
+
             const data = await res.json();
             navigateTo('view-result');
             typeWriter(data.text.trim(), 'output-text');
         } catch (err) {
-            alert("Error.");
+            alert("Connection error. Make sure your server is running!");
         } finally {
             btn.disabled = false;
             btn.classList.remove('shimmer-btn');
-            btn.innerHTML = "Help me find the words";
+            btn.innerHTML = "Keep it simple";
         }
     }
 
     function copyToClipboard() {
         navigator.clipboard.writeText(document.getElementById('output-text').textContent).then(() => {
             const btn = document.getElementById('copy-btn');
-            btn.textContent = "Saved! ✨";
+            btn.textContent = "Saved to clipboard! ✨";
             setTimeout(() => btn.textContent = "Copy Text", 2000);
         });
+    }
+
+    function shareWhatsApp() {
+        const text = document.getElementById('output-text').textContent;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
     </script>
 </body>
